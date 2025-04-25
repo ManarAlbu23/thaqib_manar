@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "237097477686",
+    "project_id": "thaqib-c2d3e",
+    "storage_bucket": "thaqib-c2d3e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:237097477686:android:1ddb648a52fe0301b75a97",
+        "android_client_info": {
+          "package_name": "com.example.lana1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjttQ7Kjg-a2plAM3H84o8xpYgDCDy1jw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:237097477686:android:65ec404726aa4769b75a97",
+        "android_client_info": {
+          "package_name": "com.example.thaqib"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjttQ7Kjg-a2plAM3H84o8xpYgDCDy1jw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:237097477686:android:0bac3be0a0e4878bb75a97",
+        "android_client_info": {
+          "package_name": "com.example.thaqib3"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjttQ7Kjg-a2plAM3H84o8xpYgDCDy1jw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
