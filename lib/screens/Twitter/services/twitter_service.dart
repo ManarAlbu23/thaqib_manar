@@ -4,7 +4,7 @@ import 'package:thaqib/screens/Twitter/models/tweet_with_user.dart';
 
 class TwitterService {
   final twitter = TwitterApi(
-    bearerToken: '...توكن تويتر حقك...',
+    bearerToken: 'AAAAAAAAAAAAAAAAAAAAAD7P0AEAAAAA2bvVqz3YmhfbVoKjvWr8RXQHdD4%3DdfDIDyb4dOvbdlDM4VvptEhJdkRPUaG6BQjTHLstyG1Iq9vft8',
   );
 
   Future<void> fetchAndStoreTweetsToFirestore({int maxResults = 10}) async {
