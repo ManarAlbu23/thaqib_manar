@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:thaqib/screens/user/homepage.dart';
+import 'admin_home_page.dart';
 
 class AdminMapPage extends StatefulWidget {
   const AdminMapPage({super.key});
@@ -39,12 +39,12 @@ class _AdminMapPageState extends State<AdminMapPage> {
   }
 
   Future<void> _launchURL(String url) async {
+    if (url.isEmpty) return;
     final uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';
     }
   }
-
 
   void _showAddLinkDialog() {
     showDialog(
@@ -99,7 +99,7 @@ class _AdminMapPageState extends State<AdminMapPage> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) => const HomeScreen()),
+              MaterialPageRoute(builder: (_) => const AdminHomeScreen()),
           ),
         ),
         centerTitle: true,
@@ -142,7 +142,7 @@ class _AdminMapPageState extends State<AdminMapPage> {
               final data = doc.data() as Map<String, dynamic>? ?? {};
 
               return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -155,30 +155,37 @@ class _AdminMapPageState extends State<AdminMapPage> {
                         color: Colors.transparent,
                         child: InkWell(
                           onTap: () => _launchURL(data['url'] ?? ''),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                data['title'] ?? '',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  decoration: TextDecoration.underline,
-                                  fontSize: 16,
-                                ),
-                                textAlign: TextAlign.right,
-                              ),
-                              const SizedBox(height: 4),
-                              if (data['description'] != null)
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
                                 Text(
-                                  data['description'],
+                                  data['title'] ?? '',
                                   style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 14,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    decoration: TextDecoration.underline,
+                                    fontSize: 16,
                                   ),
                                   textAlign: TextAlign.right,
                                 ),
-                            ],
+                                const SizedBox(height: 4),
+                                if (data['description'] != null && data['description'].toString().isNotEmpty)
+                                  Text(
+                                    data['description'],
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 14,
+                                    ),
+                                    textAlign: TextAlign.right,
+                                  ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
