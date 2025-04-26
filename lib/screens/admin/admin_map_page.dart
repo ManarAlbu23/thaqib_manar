@@ -91,6 +91,7 @@ class _AdminMapPageState extends State<AdminMapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true, // مهمة عشان الخلفية تغطي كله
       backgroundColor: const Color(0xFF1A1031),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -99,7 +100,7 @@ class _AdminMapPageState extends State<AdminMapPage> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pushReplacement(
             context,
-              MaterialPageRoute(builder: (_) => const AdminHomeScreen()),
+            MaterialPageRoute(builder: (_) => const AdminHomeScreen()),
           ),
         ),
         centerTitle: true,
@@ -114,88 +115,98 @@ class _AdminMapPageState extends State<AdminMapPage> {
           ),
         ],
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('map_links')
-            .orderBy('timestamp', descending: true)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/gradient.png', // صورة الخلفية حقتك
+              fit: BoxFit.cover,
+            ),
+          ),
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('map_links')
+                .orderBy('timestamp', descending: true)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(
-              child: Text(
-                'لا توجد روابط حالياً',
-                style: TextStyle(color: Colors.white),
-              ),
-            );
-          }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'لا توجد روابط حالياً',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                );
+              }
 
-          final docs = snapshot.data!.docs;
+              final docs = snapshot.data!.docs;
 
-          return ListView.builder(
-            itemCount: docs.length,
-            itemBuilder: (context, index) {
-              final doc = docs[index];
-              final data = doc.data() as Map<String, dynamic>? ?? {};
+              return ListView.builder(
+                itemCount: docs.length,
+                itemBuilder: (context, index) {
+                  final doc = docs[index];
+                  final data = doc.data() as Map<String, dynamic>? ?? {};
 
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.white),
-                      onPressed: () => _deleteLink(doc.id),
-                    ),
-                    Expanded(
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () => _launchURL(data['url'] ?? ''),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  data['title'] ?? '',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    decoration: TextDecoration.underline,
-                                    fontSize: 16,
-                                  ),
-                                  textAlign: TextAlign.right,
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.white),
+                          onPressed: () => _deleteLink(doc.id),
+                        ),
+                        Expanded(
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () => _launchURL(data['url'] ?? ''),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                                const SizedBox(height: 4),
-                                if (data['description'] != null && data['description'].toString().isNotEmpty)
-                                  Text(
-                                    data['description'],
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 14,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      data['title'] ?? '',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        decoration: TextDecoration.underline,
+                                        fontSize: 16,
+                                      ),
+                                      textAlign: TextAlign.right,
                                     ),
-                                    textAlign: TextAlign.right,
-                                  ),
-                              ],
+                                    const SizedBox(height: 4),
+                                    if (data['description'] != null && data['description'].toString().isNotEmpty)
+                                      Text(
+                                        data['description'],
+                                        style: const TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 14,
+                                        ),
+                                        textAlign: TextAlign.right,
+                                      ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
+                  );
+                },
               );
             },
-          );
-        },
+          ),
+        ],
       ),
     );
   }
