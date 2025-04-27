@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'admin_home_page.dart';
+import 'package:thaqib/screens/admin/admin_home_page.dart'; // غيّره حسب مسار صفحة الهوم عندك
+import 'package:thaqib/screens/admin/webview_page.dart'; // كلاس ويبفيو بنسويه تحت
 
 class AdminMapPage extends StatefulWidget {
   const AdminMapPage({super.key});
@@ -38,14 +38,6 @@ class _AdminMapPageState extends State<AdminMapPage> {
     await FirebaseFirestore.instance.collection('map_links').doc(docId).delete();
   }
 
-  Future<void> _launchURL(String url) async {
-    if (url.isEmpty) return;
-    final uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      throw 'Could not launch $url';
-    }
-  }
-
   void _showAddLinkDialog() {
     showDialog(
       context: context,
@@ -53,7 +45,6 @@ class _AdminMapPageState extends State<AdminMapPage> {
         title: const Text('إضافة رابط جديد'),
         content: SingleChildScrollView(
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: _titleController,
@@ -75,14 +66,8 @@ class _AdminMapPageState extends State<AdminMapPage> {
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
-          ),
-          ElevatedButton(
-            onPressed: _addMapLink,
-            child: const Text('إضافة'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('إلغاء')),
+          ElevatedButton(onPressed: _addMapLink, child: const Text('إضافة')),
         ],
       ),
     );
@@ -91,17 +76,13 @@ class _AdminMapPageState extends State<AdminMapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true, // مهمة عشان الخلفية تغطي كله
       backgroundColor: const Color(0xFF1A1031),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const AdminHomeScreen()),
-          ),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const AdminHomeScreen())),
         ),
         centerTitle: true,
         title: const Text(
@@ -118,37 +99,25 @@ class _AdminMapPageState extends State<AdminMapPage> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(
-              'assets/gradient.png', // صورة الخلفية حقتك
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset('assets/gradient.png', fit: BoxFit.cover),
           ),
           StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('map_links')
-                .orderBy('timestamp', descending: true)
-                .snapshots(),
+            stream: FirebaseFirestore.instance.collection('map_links').orderBy('timestamp', descending: true).snapshots(),
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
+              if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return const Center(
-                  child: Text(
-                    'لا توجد روابط حالياً',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                );
-              }
-
               final docs = snapshot.data!.docs;
+              if (docs.isEmpty) {
+                return const Center(child: Text('لا توجد روابط حالياً', style: TextStyle(color: Colors.white)));
+              }
 
               return ListView.builder(
                 itemCount: docs.length,
                 itemBuilder: (context, index) {
-                  final doc = docs[index];
-                  final data = doc.data() as Map<String, dynamic>? ?? {};
+                  final data = docs[index].data() as Map<String, dynamic>;
+                  final url = data['url'] ?? '';
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -157,44 +126,48 @@ class _AdminMapPageState extends State<AdminMapPage> {
                       children: [
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.white),
-                          onPressed: () => _deleteLink(doc.id),
+                          onPressed: () => _deleteLink(docs[index].id),
                         ),
                         Expanded(
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () => _launchURL(data['url'] ?? ''),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      data['title'] ?? '',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        decoration: TextDecoration.underline,
-                                        fontSize: 16,
-                                      ),
-                                      textAlign: TextAlign.right,
+                          child: GestureDetector(
+                            onTap: () {
+                              if (url.isNotEmpty) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => WebViewScreen(url: url),
+                                  ),
+                                );
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    data['title'] ?? '',
+                                    style: const TextStyle(
+                                      decoration: TextDecoration.underline,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
                                     ),
-                                    const SizedBox(height: 4),
-                                    if (data['description'] != null && data['description'].toString().isNotEmpty)
-                                      Text(
-                                        data['description'],
-                                        style: const TextStyle(
-                                          color: Colors.white70,
-                                          fontSize: 14,
-                                        ),
-                                        textAlign: TextAlign.right,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  if (data['description'] != null && data['description'].toString().isNotEmpty)
+                                    Text(
+                                      data['description'],
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 14,
                                       ),
-                                  ],
-                                ),
+                                    ),
+                                ],
                               ),
                             ),
                           ),
